@@ -24,7 +24,7 @@ def main(args):
     utils.set_seeds(args.seed)
     # check cuda
     use_cuda = torch.cuda.is_available()
-    if use_cuda and not args.no_cuda:
+    if use_cuda:
         args.device = torch.device("cuda:0")
     else:
         args.device = torch.device("cpu")

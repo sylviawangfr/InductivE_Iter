@@ -4,6 +4,8 @@ __pycache__/
 *$py.class
 data
 dataset_only
+saved_models
+.idea
 # C extensions
 *.so
 
