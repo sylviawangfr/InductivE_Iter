@@ -20,7 +20,7 @@ def generate_bert_feature(args):
         for ent in tqdm(entities):
             input_ids = torch.tensor(tokenizer.encode(ent)).unsqueeze(0)  # Batch size 1
             outputs = bert_encoder(input_ids)
-            last_hidden_states = outputs[0].mean(1)  # The last hidden-state is the first element of the output tuple
+            last_hidden_states = outputs[0].mean(1).squeeze()  # The last hidden-state is the first element of the output tuple
             ent2feature.update({ent: last_hidden_states.detach().cpu()})
         with open(args.out_dir + 'ent2bert.pkl', 'wb') as f:
             # write the python object (dict) to pickle file
