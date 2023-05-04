@@ -29,12 +29,12 @@ def generate_bert_feature(args):
 
 def read_entities():
     entities = []
-    in_dir1 = "../dataset_only/CN-82K/"
-    in_dir2 = "../dataset_only/CN-100K/"
+    in_dir1 = "../data/conceptnet-82k/"
+    in_dir2 = "../data/conceptnet-100k/"
     for in_dir in [in_dir1, in_dir2]:
-        for f in ['test', 'valid', 'train']:
-            df = pd.read_csv(in_dir + f"{f}.txt", sep="\t", header=None)
-            df = pd.concat([df[0], df[1], df[2]]).unique()
+        for f in ['train', 'test', 'valid']:
+            df = pd.read_csv(in_dir + f"{f}.txt", sep="\t", header=None, names=['r', 'h', 't'])
+            df = pd.concat([df['r'], df['h'], df['t']]).apply(lambda x: x.strip()).unique()
             entities.extend(df.tolist())
             entities = list(set(entities))
     return entities
