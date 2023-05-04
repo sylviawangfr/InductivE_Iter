@@ -725,7 +725,7 @@ if __name__ == '__main__':
     parser.add_argument('--input_dropout', type=float, default=0.15)
     parser.add_argument("--feature_map_dropout", type=float, default=0.15)
     parser.add_argument("--lr", type=float, default=0.0003)
-    parser.add_argument("--bert_feat_dim", type=int, default=1024)
+    parser.add_argument("--bert_feat_dim", type=int, default=768)
     parser.add_argument("--optimizer", type=str, default="Adam")
     parser.add_argument("--dec_kernel_size", type=int, default=5)
     parser.add_argument("--dec_channels", type=int, default=300)
