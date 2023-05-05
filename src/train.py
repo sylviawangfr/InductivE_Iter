@@ -739,6 +739,8 @@ if __name__ == '__main__':
     parser.add_argument("--dynamic_graph_ee_epochs", type=int, default=100)
     parser.add_argument("--start_dynamic_graph", type=int, default=50)
     parser.add_argument("--rel_regularization", type=float, default=0.1)
+    parser.add_argument("--fix_triplet_graph", type=bool, default=True)
+    parser.add_argument("--dynamic_sim_graph", type=bool, default=True)
     # Parsing all hyperparameters
     args = parser.parse_args()
     # Run main function
