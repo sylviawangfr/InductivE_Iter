@@ -732,7 +732,7 @@ if __name__ == '__main__':
     parser.add_argument("--encoder", type=str, default="RWGCN_NET")
     parser.add_argument("--graph_batch_size", type=int, default=50000)
     parser.add_argument("--entity_feat_dim", type=int, default=1024)
-    parser.add_argument("--fasttext_feat_path", type=str, default=None)
+    parser.add_argument("--fasttext_feat_path", type=str, default='None')
     parser.add_argument("--fasttext_feat_dim", type=int, default=300)
     parser.add_argument("--gnn_dropout", type=float, default=0.2)
     parser.add_argument("--n_ontology", type=int, default=5)

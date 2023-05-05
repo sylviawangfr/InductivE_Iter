@@ -1,4 +1,7 @@
+import itertools
 import re
+
+import numpy as np
 import pandas as pd
 
 from transformers import pipeline, BertModel
@@ -16,7 +19,7 @@ def get_candidates_to_fill_mask(triples):
 
 
 def fill_masked_node(sequence):
-    bert_model = BertModel.from_pretrained("../saved_models/bert-base-uncased")
+    bert_model = BertModel.from_pretrained("../../saved_models/bert-base-uncased")
     unmasker = pipeline('fill-mask', model=bert_model)
     candidates = unmasker(sequence)
     return [(i['token_str'], i['score']) for i in candidates]
@@ -43,9 +46,56 @@ def calculate_domain_and_range_dict():
     r2range = dict()
     r2domain = dict()
     for idx, row in r_df.iterrows():
-        r2range.update({row['r']: list(set(row['t']))})
-        r2domain.update({row['r']: list(set(row['h']))})
-    return r2domain, r2range
+        r2range.update({'range_' + str(row['r']): list(set(row['t']))})
+        r2domain.update({'domain_' + str(row['r']): list(set(row['h']))})
+    domain_range = dict()
+    domain_range.update(r2range)
+    domain_range.update(r2domain)
+    sup2sub, disjointness = calculate_class_constraints(domain_range)
+
+
+def generate_constraints(domain_range, sup2sub, disjointness):
+    class2id = {c: i for i, c in enumerate(domain_range.keys())}
+    pass
+
+
+
+
+def calculate_class_constraints(r2dict: dict):
+    rels = list(r2dict.keys())
+    rel_index = range(len(rels))
+    overlap_rate = np.zeros((len(rels), len(rels)))
+    for i, j in itertools.combinations(rel_index, 2):
+        i_rel = rels[i]
+        j_rel = rels[j]
+        i_instance = r2dict[i_rel]
+        j_instance = r2dict[j_rel]
+        intersection = list(set(i_instance) & set(j_instance))
+        i_in_j = len(intersection) / len(j_instance)
+        j_in_i = len(intersection) / len(i_instance)
+        overlap_rate[i, j] = i_in_j
+        overlap_rate[j, i] = j_in_i
+    overlaping_idx = np.argwhere(overlap_rate > 0.5)
+    disjointness_idx = np.argwhere(overlap_rate == 0)
+    sup_sub = dict()
+    disjointness = dict()
+    for i, j in overlaping_idx:
+        i_rel = rels[i]
+        j_rel = rels[j]
+        if i_rel in sup_sub and j_rel not in sup_sub[i_rel]:
+            sup_sub[i_rel].append(j_rel)
+        else:
+            sup_sub[i_rel] = [j_rel]
+    for i, j in disjointness_idx:
+        if i == j:
+            continue
+        i_rel = rels[i]
+        j_rel = rels[j]
+        if i_rel in disjointness and j_rel not in disjointness[i_rel]:
+            disjointness[i_rel].append(j_rel)
+        else:
+            disjointness[i_rel] = [j_rel]
+    return sup_sub, disjointness
 
 
 def get_hypernym_dict():
