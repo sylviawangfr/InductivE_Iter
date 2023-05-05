@@ -745,6 +745,7 @@ if __name__ == '__main__':
     parser.add_argument("--label_smoothing_epsilon", type=float, default=0.0001)
     parser.add_argument("--clean_update", type=int, default=50)
     parser.add_argument("--grad_norm", type=float, default=0.0001)
+    parser.add_argument("--num_hidden", type=int, default=3)
     # Parsing all hyperparameters
     args = parser.parse_args()
     # Run main function
