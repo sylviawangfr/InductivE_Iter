@@ -746,6 +746,7 @@ if __name__ == '__main__':
     parser.add_argument("--clean_update", type=int, default=50)
     parser.add_argument("--grad_norm", type=float, default=0.0001)
     parser.add_argument("--num_hidden", type=int, default=3)
+    parser.add_argument("--l_relu_ratio", type=float, default=0.001)
     # Parsing all hyperparameters
     args = parser.parse_args()
     # Run main function
