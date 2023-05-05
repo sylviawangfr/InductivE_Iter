@@ -451,8 +451,7 @@ def main(args):
                 target[j, inst] = 1.0
 
             # perform label smoothing
-            target = ((1.0 - args.label_smoothing_epsilon) * target) + (1.0 / target.size(1)) # Bug: https://github.com/TimDettmers/ConvE/issues/55
-
+            target = ((1.0 - args.label_smoothing_epsilon) * target) + (1.0 / target.size(1)) # Bug: https://github.com/TimDettmers/ConvE/issues/5
             t0 = time.time()
 
             # Update all embedding matrix / obtain graph embedding
@@ -741,6 +740,11 @@ if __name__ == '__main__':
     parser.add_argument("--rel_regularization", type=float, default=0.1)
     parser.add_argument("--fix_triplet_graph", type=bool, default=True)
     parser.add_argument("--dynamic_sim_graph", type=bool, default=True)
+    parser.add_argument("--eval_only", type=bool, default=False)
+    parser.add_argument("--overwrite", type=bool, default=False)
+    parser.add_argument("--label_smoothing_epsilon", type=float, default=0.0001)
+    parser.add_argument("--clean_update", type=int, default=50)
+    parser.add_argument("--grad_norm", type=float, default=0.0001)
     # Parsing all hyperparameters
     args = parser.parse_args()
     # Run main function
