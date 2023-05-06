@@ -469,8 +469,8 @@ def main(args):
             cum_loss += loss.cpu().item()
 
             t1 = time.time()
-            # loss.backward(retain_graph=True)
-            loss.backward()
+            optimizer.zero_grad()
+            loss.backward(retain_graph=True)
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_norm)  # clip gradients
             optimizer.step()
 
