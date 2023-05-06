@@ -231,7 +231,7 @@ class RWGCN_NET(nn.Module):
         h = self.entity_embedding.weight[node_id_copy]
 
         for i, layer in enumerate(self.rwgcn_layer):
-            h = layer(g, h)
+            h = layer(g, h.clone())
 
         return h
         
