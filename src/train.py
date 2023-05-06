@@ -293,7 +293,7 @@ def main(args):
     current_graph = fixed_graph
     fixed_train_data = train_data[:]
     print('Number of fixed training data: ', fixed_train_data.shape[0])
-
+    torch.autograd.set_detect_anomaly(True)
     while True:
         epoch += 1
 
