@@ -156,6 +156,7 @@ def sample_sub_graph(args, sample_size, tri_graph): # sample nodes
     g = dgl.DGLGraph()
     g.add_nodes(len(uniq_v))
     g.add_edges(src, dst)
+    g = g.to(args.device)
     norm = comp_deg_norm(g)
     print("# nodes: {}, # edges: {}".format(len(uniq_v), len(src)))
 
