@@ -147,7 +147,7 @@ class RWGCN_Layer(nn.Module):
         if node_repr.shape[1] == self.bias_weight.shape[0]:
             self.self_loop_att = torch.mm(torch.cat((loop_message, node_repr),dim=1), self.gating_attention)
             m = nn.Sigmoid()
-            self.self_loop_att = m(self.self_loop_att)
+            self.self_loop_att = m(self.self_loop_att.clone())
 
 
         if node_repr.shape[1] != self.bias_weight.shape[0]:
