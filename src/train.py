@@ -4,6 +4,7 @@ import sys
 import time
 import random
 from copy import deepcopy
+from pathlib import Path
 
 import torch
 import numpy as np
@@ -259,6 +260,9 @@ def main(args):
 
     t = time.localtime()
     cur_time = time.strftime("%b_%d_%H_%M_%S", t)
+    out_path = Path(args.output_dir)
+    if not out_path.exists():
+        out_path.mkdir(exist_ok=False)
     args.model_state_file = os.path.join(args.output_dir, cur_time + '.pt')
     print("Model Save Path: ", args.model_state_file)
 
@@ -512,6 +516,7 @@ def main(args):
                 print('perform evaluation on cpu')
                 # perform evaluation on cpu
                 model.cpu()
+                g_whole = g_whole.cpu()
                 g_whole.ndata['id'] = g_whole.ndata['id'].cpu()
                 g_whole.ndata['norm'] = g_whole.ndata['norm'].cpu()
                 g_whole.edata['type'] = g_whole.edata['type'].cpu()
@@ -562,6 +567,7 @@ def main(args):
             # Evluate on CPU
             print('Update whole entity embedding from generated graph')
             if args.dataset == 'atomic' or args.dataset[:10] == 'conceptnet':
+                g_whole = g_whole.cpu()
                 g_whole.ndata['id'] = g_whole.ndata['id'].cpu()
                 g_whole.ndata['norm'] = g_whole.ndata['norm'].cpu()
                 g_whole.edata['type'] = g_whole.edata['type'].cpu()
@@ -616,6 +622,7 @@ def main(args):
                 # transfer back 
                 print('Transfer model back to:', args.device)
                 model.to(args.device)
+                g_whole = g_whole.to(args.device)
                 g_whole.ndata['id'] = g_whole.ndata['id'].to(args.device)
                 g_whole.ndata['norm'] = g_whole.ndata['norm'].to(args.device)
                 g_whole.edata['type'] = g_whole.edata['type'].to(args.device)
@@ -648,6 +655,7 @@ def main(args):
     if args.dataset == 'atomic' or args.dataset[:10] == 'conceptnet':
         print('perform evaluation on cpu')
         model.cpu()
+        g_whole = g_whole.cpu()
         g_whole.ndata['id'] = g_whole.ndata['id'].cpu()
         g_whole.ndata['norm'] = g_whole.ndata['norm'].cpu()
         g_whole.edata['type'] = g_whole.edata['type'].cpu()
@@ -687,6 +695,7 @@ def main(args):
     if args.dataset == 'atomic' or args.dataset[:10] == 'conceptnet':
         print('perform evaluation on cpu')
         model.cpu()
+        g_whole = g_whole.cpu()
         g_whole.ndata['id'] = g_whole.ndata['id'].cpu()
         g_whole.ndata['norm'] = g_whole.ndata['norm'].cpu()
         g_whole.edata['type'] = g_whole.edata['type'].cpu()
@@ -713,7 +722,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="experiment settings")
     parser.add_argument('--dataset', type=str, default="conceptnet-82k")
     parser.add_argument('--evaluate_every', type=int, default=15)
-    parser.add_argument('--output_dir', type=str, default="../saved_ckg_model")
+    parser.add_argument('--output_dir', type=str, default="../saved_ckg_model/")
     parser.add_argument('--bert_feat_path', type=str, default="../data/saved_entity_embedding/conceptnet/ent2bert.pkl")
     parser.add_argument('--decoder_embedding_dim', type=int, default=500)
     parser.add_argument('--decoder_batch_size', type=int, default=256)
