@@ -457,6 +457,7 @@ def main(args):
             # Update all embedding matrix / obtain graph embedding
             if i % args.clean_update == 0:
                 model.update_whole_embedding_matrix(g, node_id_copy)
+
             
             # add loss according to degree (Not used)
             #sample_normaliaztion = torch.tensor(1.0/degrees[e1.cpu()]).to(args.device)
@@ -744,9 +745,9 @@ if __name__ == '__main__':
     parser.add_argument("--eval_only", type=bool, default=False)
     parser.add_argument("--overwrite", type=bool, default=False)
     parser.add_argument("--label_smoothing_epsilon", type=float, default=0.0001)
-    parser.add_argument("--clean_update", type=int, default=50)
+    parser.add_argument("--clean_update", type=int, default=2)
     parser.add_argument("--grad_norm", type=float, default=0.0001)
-    parser.add_argument("--num_hidden", type=int, default=3)
+    parser.add_argument("--num_hidden", type=int, default=2)
     parser.add_argument("--l_relu_ratio", type=float, default=0.001)
     # Parsing all hyperparameters
     args = parser.parse_args()
