@@ -713,7 +713,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="experiment settings")
     parser.add_argument('--dataset', type=str, default="conceptnet-82k")
     parser.add_argument('--evaluate_every', type=int, default=15)
-    parser.add_argument('--output_dir', type=str, default="../saved/saved_ckg_model")
+    parser.add_argument('--output_dir', type=str, default="../saved_ckg_model")
     parser.add_argument('--bert_feat_path', type=str, default="../data/saved_entity_embedding/conceptnet/ent2bert.pkl")
     parser.add_argument('--decoder_embedding_dim', type=int, default=500)
     parser.add_argument('--decoder_batch_size', type=int, default=256)
