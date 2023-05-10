@@ -202,6 +202,7 @@ def main(args):
         if args.dataset == 'atomic' or args.dataset[:10] == 'conceptnet':
             print('perform evaluation on cpu')
             model.cpu()
+            g_whole = g_whole.cpu()
             g_whole.ndata['id'] = g_whole.ndata['id'].cpu()
             g_whole.ndata['norm'] = g_whole.ndata['norm'].cpu()
             g_whole.edata['type'] = g_whole.edata['type'].cpu()
@@ -359,6 +360,7 @@ def main(args):
             if args.dataset == 'atomic' or args.dataset[:10] == 'conceptnet':
                 # perform evaluation on cpu
                 model.cpu()
+                g_whole = g_whole.cpu()
                 g_whole.ndata['id'] = g_whole.ndata['id'].cpu()
                 g_whole.ndata['norm'] = g_whole.ndata['norm'].cpu()
                 g_whole.edata['type'] = g_whole.edata['type'].cpu()
