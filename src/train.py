@@ -730,7 +730,7 @@ if __name__ == '__main__':
     parser.add_argument('--decoder_batch_size', type=int, default=256)
     parser.add_argument('--n_epochs', type=int, default=100)
     parser.add_argument('--decoder', type=str, default="ConvTransE")
-    parser.add_argument('--patient', type=int, default=10)
+    parser.add_argument('--patient', type=int, default=5)
     parser.add_argument("--seed", type=int, default=1234)
     parser.add_argument('--regularization', type=float, default=1e-25)
     parser.add_argument('--dropout', type=float, default=0.20)
