@@ -192,11 +192,7 @@ def produce(args):
     # set random seed
     # utils.set_seeds(args.seed)
     # check cuda
-    use_cuda = torch.cuda.is_available()
-    if use_cuda:
-        args.device = torch.device("cuda:0")
-    else:
-        args.device = torch.device("cpu")
+    args.device = torch.device("cpu")
 
     # - - - - - - - - - - - - - - - - - Data Loading - - - - - - - - - - - - - - - - - - -
     # Load train data only
@@ -274,7 +270,7 @@ def produce(args):
         model.encoder.entity_embedding.load_state_dict({'weight': fasttext_feature})
     else:
         print("No node feature provided. Use uniform initialization")
-    # model.to(args.device)
+    model.to(args.device)
 
     # - - - - - - - - - - - - - - Evaluation Only - - - - - - - - - - - - - - - - - - -
     # TODO, not finished
@@ -305,7 +301,7 @@ def produce(args):
     if model.entity_embedding != None:
         del model.entity_embedding
         model.entity_embedding = None
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
     node_id_copy = np.copy(node_id)
     model.update_whole_embedding_matrix(g_whole, node_id_copy)
 
