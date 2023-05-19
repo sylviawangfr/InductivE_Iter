@@ -11,10 +11,10 @@ import json
 #######################################################################
 # Utility functions for producing
 #######################################################################
-from src import utils, reader_utils, data_loader
-from src.graph import Graph
-from src.model import LinkPredictor
-from src.reader import Reader
+import utils, reader_utils, data_loader
+from graph import Graph
+from model import LinkPredictor
+from reader import Reader
 
 
 def pred_head(model, test_triplets, e1_to_multi_e2, network, num_rels):
