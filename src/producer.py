@@ -1,6 +1,8 @@
 import argparse
 import os
 import sys
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
 import torch
@@ -17,7 +19,7 @@ from model import LinkPredictor
 from reader import Reader
 
 
-def pred_head(model, test_triplets, e1_to_multi_e2, network, num_rels):
+def pred_head(model, test_triplets, e1_to_multi_e2, network, num_rels, top_k):
     s = test_triplets[:, 0]
     r = test_triplets[:, 1]
     o = test_triplets[:, 2]
@@ -52,14 +54,19 @@ def pred_head(model, test_triplets, e1_to_multi_e2, network, num_rels):
             # pred2[j][e1[j]] = target_value2
         pred2 = pred2.data.cpu()
         scores.append(pred2)
-    candidates = get_topk_tuples(torch.cat(scores, dim=0).cpu().numpy(), test_triplets, network, target='head')
-    with open("topk_head_candidates.jsonl", 'w') as f:
+    candidates = get_topk_tuples(torch.cat(scores, dim=0).cpu().numpy(), test_triplets, network, target='head', k=top_k)
+    out_path = Path("../outputs/")
+    if not out_path.exists():
+        out_path.mkdir(exist_ok=False)
+    out_file = os.path.join(out_path, 'topk_head_candidates.jsonl')
+    with open(out_file, 'w') as f:
         for entry in candidates:
             json.dump(entry, f)
             f.write("\n")
+        print(f"file saved as {str(out_file)}")
 
 
-def pred_tail(model, test_triplets, e1_to_multi_e2, network):
+def pred_tail(model, test_triplets, e1_to_multi_e2, network, top_k):
     s = test_triplets[:, 0]
     r = test_triplets[:, 1]
     o = test_triplets[:, 2]
@@ -95,14 +102,19 @@ def pred_tail(model, test_triplets, e1_to_multi_e2, network):
             # pred1[j][e2[j]] = target_value1
         pred1 = pred1.data.cpu()
         scores.append(pred1)
-    candidates = get_topk_tuples(torch.cat(scores, dim=0).cpu().numpy(), test_triplets, network, target='tail')
-    with open("topk_tail_candidates.jsonl", 'w') as f:
+    candidates = get_topk_tuples(torch.cat(scores, dim=0).cpu().numpy(), test_triplets, network, target='tail', k=top_k)
+    out_path = Path("../outputs/")
+    if not out_path.exists():
+        out_path.mkdir(exist_ok=False)
+    out_file = os.path.join(out_path, 'topk_tail_candidates.jsonl')
+    with open(out_file, 'w') as f:
         for entry in candidates:
             json.dump(entry, f)
             f.write("\n")
+        print(f"file saved as {str(out_file)}")
 
 
-def get_topk_tuples(scores, input_prefs, network, target, k=5):
+def get_topk_tuples(scores, input_prefs, network, target, k):
     out_lines = []
     argsort = [np.argsort(-1 * np.array(score)) for score in np.array(scores)]
 
@@ -141,7 +153,6 @@ class ConceptNetProducerReader(Reader):
     def read_network(self, hrt_df: pd.DataFrame, train_network=None):
         acc_add_nodes = 0
         for idx, row in hrt_df.iterrows():
-            self.add_example(row['h'], row['t'], row['r'], float(0))
             _, new_added = self.add_example(row['h'], row['t'], row['r'], float(1), int(1), train_network)
             acc_add_nodes += new_added
         self.rel2id = self.graph.relation2id
@@ -180,12 +191,29 @@ class ConceptNetProducerReader(Reader):
 
 def load_test(hrt_df, train_network):
     # load graph data
+    ent_col = ['h', 't']
+    rel_col = ['r']
+    ent2id = train_network.graph.node2id
+    rel2id = train_network.rel2id
+    filtered_hrt_df = hrt_df[ent_col].applymap(lambda x: x if x in ent2id else np.nan)
+    filtered_hrt_df['r'] = hrt_df[rel_col].applymap(lambda x: x if x in rel2id else np.nan)
+    filtered_hrt_df = filtered_hrt_df.dropna()
     test_network = ConceptNetProducerReader()
-    test_network.read_network(hrt_df, train_network=train_network)
+    test_network.read_network(filtered_hrt_df, train_network=train_network)
     word_vocab = train_network.graph.node2id
     test_data, _ = reader_utils.prepare_batch_dgl(word_vocab, test_network, train_network)
     test_data = torch.LongTensor(test_data)
     return test_data
+
+
+def generate_tests():
+    test_tri = []
+    with open("../data/strict.jsonl", 'r') as f:
+        for line in f:
+            r = json.loads(line)
+            test_tri.append([r['subject'], r['predicate'], r['object']])
+    test_tri_df = pd.DataFrame(data=test_tri, columns=['h', 'r', 't'])
+    return test_tri_df
 
 
 def produce(args):
@@ -202,7 +230,8 @@ def produce(args):
     args.num_nodes = num_nodes
     args.num_rels = num_rels
     # Load test data
-
+    produce_head_data = load_test(args.pred_head_df, train_network)
+    produce_tail_data = load_test(args.pred_tail_df, train_network)
 
     # calculate degrees for entities
     _, degrees, _, _ = utils.get_adj_and_degrees(num_nodes, num_rels, train_data)
@@ -307,10 +336,8 @@ def produce(args):
 
     # evaluation_utils.ranking_and_hits(args, model, valid_data, all_e1_to_multi_e2, train_network)
     print("================Produce Head=================")
-    produce_head_data = load_test(args.pred_head_df, train_network)
-    produce_tail_data = load_test(args.pred_tail_df, train_network)
-    pred_head(model, produce_head_data, all_e1_to_multi_e2, train_network, args.num_rels)
-    pred_tail(model, produce_tail_data, all_e1_to_multi_e2, train_network)
+    pred_head(model, produce_head_data, all_e1_to_multi_e2, train_network, args.num_rels, top_k=args.top_k)
+    pred_tail(model, produce_tail_data, all_e1_to_multi_e2, train_network, top_k=args.top_k)
 
 
 if __name__ == '__main__':
@@ -354,11 +381,14 @@ if __name__ == '__main__':
     parser.add_argument("--grad_norm", type=float, default=0.0001)
     parser.add_argument("--num_hidden", type=int, default=2)
     parser.add_argument("--l_relu_ratio", type=float, default=0.001)
+    parser.add_argument("--top_k", type=int, default=5)
     # Parsing all hyperparameters
     args = parser.parse_args()
     test = pd.read_csv("../data/conceptnet-82k/test.txt", sep="\t", header=None, names=['r', 'h', 't'])
-    args.pred_head_df = test.sample(5)
-    args.pred_tail_df = test.sample(5)
+    # args.pred_head_df = generate_tests()
+    # args.pred_tail_df = args.pred_head_df
+    args.pred_head_df = test.sample(100)
+    args.pred_tail_df = test.sample(100)
     # Run main function
     try:
         produce(args)
